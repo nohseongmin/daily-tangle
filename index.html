@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TANGLE — 하루 한 매듭</title>
+  <meta name="description" content="매일 새 매듭 하나. 노드를 끌어 선이 하나도 안 겹치게 풀어라. 무료·설치 없이 브라우저에서. 결과를 링크로 공유해 대결.">
+  <meta name="theme-color" content="#0e1016">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪢</text></svg>">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TANGLE — 하루 한 매듭">
+  <meta property="og:description" content="매일 반드시 풀리는 매듭 하나. 선이 안 겹치게 풀고 기록을 공유하세요.">
+  <meta property="og:url" content="https://nohseongmin.github.io/daily-tangle/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🪢 TANGLE</h1>
+    <p class="tagline">노드를 끌어 <b>선이 하나도 안 겹치게</b> — 하루 한 매듭.</p>
+  </header>
+
+  <main>
+    <div id="hud">
+      <span class="stat"><span class="k">매듭</span> <b id="puzzleNo">#—</b></span>
+      <span class="stat"><span class="k">겹침</span> <b id="crossings">—</b></span>
+      <span class="stat"><span class="k">이동</span> <b id="moves">0</b></span>
+      <span class="stat"><span class="k">시간</span> <b id="clock">0:00</b></span>
+    </div>
+
+    <div id="stage">
+      <canvas id="game" width="420" height="520"></canvas>
+      <div id="win" class="overlay hidden">
+        <div class="big">🎉</div>
+        <h2>풀었다!</h2>
+        <div id="winStats" class="winstats"></div>
+        <div class="overlay-buttons">
+          <button id="btnShare" class="btn primary">🔗 결과 공유</button>
+          <button id="btnPractice" class="btn secondary">🎲 연습판</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button id="btnReset" class="btn secondary">↺ 되돌리기(리셋)</button>
+      <button id="btnPractice2" class="btn secondary">🎲 연습판</button>
+      <button id="btnMute" class="btn secondary" title="소리">🔊</button>
+    </div>
+
+    <div class="ad-slot">AD SLOT (reserved)</div>
+  </main>
+
+  <footer>
+    <p>매일 <b>같은 매듭</b>이 전 세계에 출제됩니다. 시작 배치가 평면이라 <b>반드시 풀립니다</b>.</p>
+  </footer>
+
+  <div id="toast" class="hidden"></div>
+  <script src="game.js?v=1"></script>
+</body>
+</html>

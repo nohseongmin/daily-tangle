@@ -236,13 +236,13 @@ function render() {
 /* ---------- Round flow ---------- */
 function recompute() {
   const r = evalCrossings(state.puzzle.pos, state.puzzle.edges);
-  const wasClear = state.crossPairs;
+  const prevPairs = state.crossPairs;
   state.badEdges = r.bad;
   state.crossPairs = r.pairs;
   el("crossings").textContent = String(r.pairs);
   el("crossings").style.color = r.pairs === 0 ? "var(--clear)" : "var(--cross)";
   if (r.pairs === 0 && !state.solved) win();
-  else if (r.pairs < wasClear) SFX.clear();
+  else if (r.pairs < prevPairs) SFX.clear();
 }
 
 function startRound(cfg) {

@@ -1,6 +1,6 @@
 :root{
   --bg:#0e1016; --panel:#171a22; --panel2:#1e222c; --bd:#2a2f3a;
-  --tx:#e8ebf2; --mut:#8b93a4; --acc:#5ee0a0; --acc2:#3fbe84;
+  --tx:#e8ebf2; --mut:#8b93a4; --acc:#5ee0a0;
   --cross:#f2637a; --clear:#5ee0a0;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}

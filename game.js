@@ -59,6 +59,18 @@ const SFX = (() => {
 })();
 document.addEventListener("pointerdown", () => SFX.unlock(), { once: true });
 
+/* ---------- Daily streak + resume (localStorage, no backend) ---------- */
+const STORE_KEY = "tangle_daily";
+const Store = {
+  read() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+    catch { return {}; }
+  },
+  save(data) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch { /* storage unavailable */ }
+  },
+};
+
 /* ---------- Seeded RNG (mulberry32) ---------- */
 function mulberry32(seed) {
   let a = seed >>> 0;
@@ -264,11 +276,35 @@ function startRound(cfg) {
   recompute();
   render();
   syncUrl();
+
+  const saved = Store.read();
+  showStreak(saved.streak || 0);
+  if (cfg.daily && saved.day === cfg.puzzleNo) resumeCleared(saved);
 }
 
+function showStreak(n) {
+  el("streak").textContent = String(n);
+  el("streak").style.color = n > 0 ? "var(--clear)" : "var(--tx)";
+}
+
+// 오늘 데일리를 이미 클리어한 채로 재방문 → 완료 상태·오버레이 복원
+function resumeCleared(saved) {
+  state.solved = true;
+  el("moves").textContent = String(saved.moves || 0);
+  el("clock").textContent = fmtTime(saved.secs || 0);
+  el("crossings").textContent = "0";
+  el("crossings").style.color = "var(--clear)";
+  const streakNote = saved.streak > 1 ? ` · 🔥${saved.streak}일` : "";
+  el("winStats").textContent = `매듭 #${state.puzzleNo} · ${saved.moves || 0}수 · ${fmtTime(saved.secs || 0)}${streakNote}`;
+  el("win").classList.remove("hidden");
+}
+
+function fmtTime(secs) {
+  return Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0");
+}
 function clockText() {
   const s = state.startedAt ? Math.floor((Date.now() - state.startedAt) / 1000) : 0;
-  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  return fmtTime(s);
 }
 function startClockIfNeeded() {
   if (state.startedAt) return;
@@ -276,12 +312,25 @@ function startClockIfNeeded() {
   state.clockTimer = setInterval(() => { el("clock").textContent = clockText(); }, 1000);
 }
 
+// 데일리 클리어 기록: 어제 클리어했으면 연속 +1, 아니면 1로 초기화. 같은 날 재기록은 무시.
+function recordDaily() {
+  const saved = Store.read();
+  if (saved.day === state.puzzleNo) return saved.streak || 0;
+  const secs = state.startedAt ? Math.floor((Date.now() - state.startedAt) / 1000) : 0;
+  const streak = saved.day === state.puzzleNo - 1 ? (saved.streak || 0) + 1 : 1;
+  Store.save({ day: state.puzzleNo, streak, moves: state.moves, secs });
+  return streak;
+}
+
 function win() {
   state.solved = true;
   clearInterval(state.clockTimer);
   SFX.win();
+  const streak = state.daily ? recordDaily() : 0;
+  if (state.daily) showStreak(streak);
   const label = state.daily ? "매듭 #" + state.puzzleNo : "연습판 seed " + state.seed;
-  el("winStats").textContent = `${label} · ${state.moves}수 · ${clockText()}`;
+  const streakNote = streak > 1 ? ` · 🔥${streak}일` : "";
+  el("winStats").textContent = `${label} · ${state.moves}수 · ${clockText()}${streakNote}`;
   el("win").classList.remove("hidden");
 }
 

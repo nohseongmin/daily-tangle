@@ -192,6 +192,45 @@ function readConfig() {
   return { daily: true, seed: (day * SEED_MIX) >>> 0, puzzleNo: day };
 }
 
+/* ---------- Daily progress & streak (localStorage, no backend) ---------- */
+const PROGRESS_KEY = "tangle_progress";
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)); }
+  catch { return null; } // 저장소 없음/파손: 진행도 없음으로 취급
+}
+function saveProgress(p) {
+  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(p)); }
+  catch { /* storage unavailable: 스트릭 저장 생략 */ }
+}
+// 오늘 또는 어제 클리어면 스트릭 유지, 그 외엔 끊긴 것으로 0
+function currentStreak() {
+  const p = loadProgress();
+  if (!p) return 0;
+  const today = todayNumber();
+  return (p.lastNo === today || p.lastNo === today - 1) ? p.streak : 0;
+}
+function showStreak() {
+  el("streak").textContent = String(currentStreak());
+}
+// 데일리 클리어 1회 기록: 연속일이면 +1, 오늘 재기록이면 값 유지
+function recordDaily() {
+  const prev = loadProgress();
+  let streak = 1;
+  if (prev) {
+    if (prev.lastNo === state.puzzleNo) streak = prev.streak;
+    else if (prev.lastNo === state.puzzleNo - 1) streak = prev.streak + 1;
+  }
+  saveProgress({ lastNo: state.puzzleNo, moves: state.moves, time: clockText(), streak });
+}
+// 오늘 매듭을 이미 풀었으면 클리어 화면을 복원
+function restoreSolvedDaily() {
+  const p = loadProgress();
+  if (!p || p.lastNo !== state.puzzleNo) return;
+  state.solved = true;
+  el("winStats").textContent = `매듭 #${state.puzzleNo} · ${p.moves}수 · ${p.time}`;
+  el("win").classList.remove("hidden");
+}
+
 /* ---------- Pointer → canvas coords ---------- */
 function toCanvas(e) {
   const r = canvas.getBoundingClientRect();
@@ -263,6 +302,8 @@ function startRound(cfg) {
   el("win").classList.add("hidden");
   recompute();
   render();
+  if (state.daily) restoreSolvedDaily();
+  showStreak();
   syncUrl();
 }
 
@@ -283,6 +324,7 @@ function win() {
   const label = state.daily ? "매듭 #" + state.puzzleNo : "연습판 seed " + state.seed;
   el("winStats").textContent = `${label} · ${state.moves}수 · ${clockText()}`;
   el("win").classList.remove("hidden");
+  if (state.daily) { recordDaily(); showStreak(); }
 }
 
 function syncUrl() {

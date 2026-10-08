@@ -1,36 +1,38 @@
-# 🪢 TANGLE — 하루 한 매듭 (Daily Untangle)
+# Daily Tangle
 
-> 매일 새 매듭 하나. 노드를 끌어 **어떤 두 선도 겹치지 않게** 풀면 끝.
-> 무료 · 설치 없이 브라우저에서. 결과를 링크로 공유해 대결. (Wordle처럼 전원이 같은 문제)
+A daily untangling puzzle. Drag the nodes until no two edges cross. Everyone gets the same puzzle for the day, and results can be shared by link.
 
-**플레이:** `index.html`을 열면 끝. 배포는 GitHub Pages.
+Open `index.html` in a browser to play. The files can be hosted on GitHub Pages without a build step.
 
-## 왜 반드시 풀리나 (핵심)
-퍼즐은 **평면 그래프**에서 만든다: 노드를 배치한 "해(solution) 좌표"에서 **서로 겹치지 않는 간선만** 골라 넣는다(`buildPlanarEdges`). 그래서 그 해 좌표는 교차 0 배치이고 — **겹침 없는 정답이 존재함이 수학적으로 보장**된다. 그다음 노드 위치만 뒤섞어 출제한다. (60개 시드 전수 검증: 해 배치 교차 0, 시작 배치는 60/60 엉킴.)
+## Puzzle generation
 
-## 데일리 & 공유
-- 날짜에서 시드 생성 → **전 세계가 같은 매듭**. 매듭 번호 = 기준일로부터의 날짜 수.
-- `?seed=<정수>` 로 연습판 무제한. 클리어 시 "매듭#·이동수·시간"을 클립보드로 복사해 공유.
+`buildPlanarEdges` selects edges that do not cross at a known solution layout, then shuffles the nodes. This guarantees that a layout with no crossings exists.
 
-## 스택
-- 바닐라 JS + Canvas 2D, 런타임 의존성 0, GitHub Pages
-- 시드 RNG(mulberry32) → 같은 시드 = 같은 매듭(재현·공유)
-- 절차적 WebAudio(에셋 0)
+The recorded check covered 60 seeds: every solution had zero crossings, and all 60 starting layouts had crossings.
 
-## 구조
+## Daily puzzles and sharing
+
+- The date determines the seed. The puzzle number counts days from the reference date.
+- Use `?seed=<integer>` for practice puzzles.
+- After solving a puzzle, copy its number, move count, and time to share your result.
+
+## Implementation
+
+Vanilla JavaScript and Canvas 2D, with no runtime dependencies. A seeded mulberry32 generator makes puzzles reproducible. WebAudio generates the sounds.
+
+```text
+index.html   Game interface and completion overlay
+style.css    Mobile layout and dark theme
+game.js      Graph generation, crossings, dragging, and sharing
+BLUEPRINT.md Project scope and design notes
 ```
-daily-tangle/
-├── index.html   # HUD + 캔버스 + 승리 오버레이
-├── style.css    # 다크 모바일-퍼스트
-├── game.js      # 평면그래프 생성 · 교차판정 · 드래그 · 데일리/공유
-├── BLUEPRINT.md # 시장·BM·보안·스택·MVP 범위
-└── README.md
-```
 
-## 로드맵
-1. 일일 랭킹/스트릭 + 공유 카드(og:image)
-2. 난이도 티어(노드/간선 수) + 힌트 + 테마 코스메틱
-3. **3D 프레젠테이션**(Three.js: 노드 3D 회전) — 원안 "지혜의 고리" 감성 복원
+## Planned work
 
-## 라이선스
-MIT
+- Daily rankings, streaks, and share cards.
+- Difficulty levels, hints, and cosmetic themes.
+- A Three.js presentation with rotating 3D nodes.
+
+## License
+
+MIT.

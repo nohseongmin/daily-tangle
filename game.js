@@ -323,6 +323,7 @@ function recordDaily() {
 }
 
 function win() {
+  endDrag();
   state.solved = true;
   clearInterval(state.clockTimer);
   SFX.win();

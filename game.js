@@ -342,8 +342,7 @@ function syncUrl() {
 
 /* ---------- Share ---------- */
 async function share() {
-  const head = state.daily ? `🪢 TANGLE #${state.puzzleNo}` : `🪢 TANGLE 연습(seed ${state.seed})`;
-  const text = `${head} — ${state.moves}수 · ${clockText()} 클리어!\n${location.origin}${location.pathname}${state.daily ? "" : "?seed=" + state.seed}`;
+  const text = `🪢 TANGLE ${el("winStats").textContent} 클리어!\n${location.origin}${location.pathname}${state.daily ? "" : "?seed=" + state.seed}`;
   try {
     await navigator.clipboard.writeText(text);
     toast("결과 복사됨! 친구에게 붙여넣어 대결 🔗");

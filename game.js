@@ -186,6 +186,7 @@ const state = {
   badEdges: new Set(),
   moves: 0,
   dragIndex: -1,
+  dragPointerId: null,
   dragMoved: false,
   startedAt: 0,
   clockTimer: null,
@@ -264,6 +265,7 @@ function startRound(cfg) {
   state.puzzleNo = cfg.puzzleNo;
   state.moves = 0;
   state.dragIndex = -1;
+  state.dragPointerId = null;
   state.solved = false;
   state.startedAt = 0;
   clearInterval(state.clockTimer);
@@ -372,18 +374,19 @@ function nodeAt(p) {
 }
 
 canvas.addEventListener("pointerdown", (e) => {
-  if (state.solved) return;
+  if (state.solved || state.dragIndex >= 0) return;
   const p = toCanvas(e);
   const i = nodeAt(p);
   if (i < 0) return;
   state.dragIndex = i;
+  state.dragPointerId = e.pointerId;
   state.dragMoved = false;
   SFX.grab();
   render();
   canvas.setPointerCapture(e.pointerId);
 });
 canvas.addEventListener("pointermove", (e) => {
-  if (state.dragIndex < 0) return;
+  if (state.dragIndex < 0 || e.pointerId !== state.dragPointerId) return;
   const p = toCanvas(e);
   state.puzzle.pos[state.dragIndex] = {
     x: clamp(p.x, NODE_R, W - NODE_R),
@@ -394,14 +397,15 @@ canvas.addEventListener("pointermove", (e) => {
   recompute();
   render();
 });
-function endDrag() {
-  if (state.dragIndex < 0) return;
+function endDrag(e) {
+  if (state.dragIndex < 0 || (e && e.pointerId !== state.dragPointerId)) return;
   if (state.dragMoved) {
     state.moves += 1;
     el("moves").textContent = String(state.moves);
     SFX.drop();
   }
   state.dragIndex = -1;
+  state.dragPointerId = null;
   render();
 }
 canvas.addEventListener("pointerup", endDrag);

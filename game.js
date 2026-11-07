@@ -25,7 +25,9 @@ const SEED_MIX = 2654435761;      // Knuth 승수 — 인접 날짜 시드를 �
 /* ---------- Sound (procedural WebAudio, no assets) ---------- */
 const SFX = (() => {
   let ctx = null;
-  let muted = localStorage.getItem("tangle_muted") === "1";
+  let muted = false;
+  try { muted = localStorage.getItem("tangle_muted") === "1"; }
+  catch { console.warn("Sound preference could not be read."); }
   const ac = () => {
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
     if (ctx.state === "suspended") ctx.resume();
@@ -53,7 +55,12 @@ const SFX = (() => {
     drop() { blip(220, 0.05, "sine", 0.06, 0.9); },
     clear() { blip(720, 0.06, "triangle", 0.08, 1.2); },
     win() { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => blip(f, 0.16, "triangle", 0.15, 1), i * 100)); },
-    toggle() { muted = !muted; localStorage.setItem("tangle_muted", muted ? "1" : "0"); return muted; },
+    toggle() {
+      muted = !muted;
+      try { localStorage.setItem("tangle_muted", muted ? "1" : "0"); }
+      catch { console.warn("Sound preference could not be saved."); }
+      return muted;
+    },
     get muted() { return muted; },
   };
 })();

@@ -44,7 +44,8 @@ const context = vm.createContext({
   setTimeout() {},
   clearTimeout() {},
 });
-vm.runInContext(fs.readFileSync(path.join(__dirname, "game.js"), "utf8"), context);
+const source = fs.readFileSync(path.join(__dirname, "game.js"), "utf8");
+vm.runInContext(source, context);
 const state = vm.runInContext("state", context);
 state.puzzle = {
   pos: [{ x: 100, y: 100 }, { x: 300, y: 300 }, { x: 100, y: 300 }, { x: 300, y: 100 }],
@@ -91,3 +92,20 @@ assert.equal(state.solved, true);
 assert.equal(state.dragIndex, -1);
 assert.equal(state.dragPointerId, null);
 assert.equal(state.moves, 3);
+
+// Storage restrictions must not prevent startup or in-session sound toggling.
+const warnings = [];
+const blockedContext = vm.createContext({
+  ...context,
+  localStorage: {
+    getItem() { throw new Error("Storage unavailable"); },
+    setItem() { throw new Error("Storage unavailable"); },
+  },
+  console: { warn: (message) => warnings.push(message) },
+});
+assert.doesNotThrow(() => vm.runInContext(source, blockedContext));
+assert.equal(vm.runInContext("state.puzzle !== null", blockedContext), true);
+assert.equal(vm.runInContext("SFX.muted", blockedContext), false);
+assert.equal(vm.runInContext("SFX.toggle()", blockedContext), true);
+assert.equal(vm.runInContext("SFX.toggle()", blockedContext), false);
+assert.equal(warnings.length, 3);
